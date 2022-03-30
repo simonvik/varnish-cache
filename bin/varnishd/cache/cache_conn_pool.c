@@ -617,7 +617,7 @@ vtp_close(struct pfd *pfd)
 {
 
 	CHECK_OBJ_NOTNULL(pfd, PFD_MAGIC);
-	VTCP_close(&pfd->fd);
+	VTCP_close(&pfd->fd, NULL);
 }
 
 static void v_matchproto_(cp_name_f)

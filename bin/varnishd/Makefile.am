@@ -174,7 +174,7 @@ varnishd_CFLAGS = \
 	-DVARNISH_VMOD_DIR='"${vmoddir}"' \
 	-DVARNISH_VCL_DIR='"${pkgsysconfdir}:${vcldir}"'
 
-varnishd_LDFLAGS = -export-dynamic
+varnishd_LDFLAGS = -export-dynamic @SSL_LIBS@
 
 varnishd_LDADD = \
 	$(top_builddir)/lib/libvcc/libvcc.la \

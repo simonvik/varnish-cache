@@ -78,7 +78,11 @@ v1d_error(struct req *req, const char *msg)
 	VSLb(req->vsl, SLT_RespReason, "Internal Server Error");
 
 	req->wrk->stats->client_resp_500++;
-	VTCP_Assert(write(req->sp->fd, r_500, sizeof r_500 - 1));
+	if(req->sp->ssl != NULL)
+		VTCP_Assert(SSL_write(req->sp->ssl, r_500, sizeof r_500 - 1));
+	else
+		VTCP_Assert(write(req->sp->fd, r_500, sizeof r_500 - 1));
+		
 	req->doclose = SC_TX_EOF;
 }
 
@@ -138,7 +142,7 @@ V1D_Deliver(struct req *req, struct boc *boc, int sendbody)
 	}
 
 	AZ(req->wrk->v1l);
-	V1L_Open(req->wrk, req->wrk->aws, &req->sp->fd, req->vsl,
+	V1L_Open(req->wrk, req->wrk->aws, &req->sp->fd, req->sp->ssl, req->vsl,
 	    req->t_prev + SESS_TMO(req->sp, send_timeout),
 	    cache_param->http1_iovs);
 

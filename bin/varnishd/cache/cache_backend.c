@@ -387,7 +387,7 @@ vbe_dir_http1pipe(VRT_CTX, VCL_BACKEND d)
 		    &v1a.bereq, &v1a.out);
 		VSLb_ts_req(ctx->req, "Pipe", W_TIM_real(ctx->req->wrk));
 		if (i == 0)
-			V1P_Process(ctx->req, *PFD_Fd(pfd), &v1a);
+			V1P_Process(ctx->req, *PFD_Fd(pfd), NULL,  &v1a);
 		VSLb_ts_req(ctx->req, "PipeSess", W_TIM_real(ctx->req->wrk));
 		ctx->bo->htc->doclose = SC_TX_PIPE;
 		vbe_dir_finish(ctx, d);

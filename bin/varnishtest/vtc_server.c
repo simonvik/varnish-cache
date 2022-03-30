@@ -215,7 +215,7 @@ server_listen(struct server *s)
 	CHECK_OBJ_NOTNULL(s, SERVER_MAGIC);
 
 	if (s->sock >= 0)
-		VTCP_close(&s->sock);
+		VTCP_close(&s->sock, NULL);
 	if (*s->listen != '/')
 		server_listen_tcp(s, &err);
 	else
@@ -267,7 +267,7 @@ server_disc(void *priv, struct vtclog *vl, int *fdp)
 	j = shutdown(*fdp, SHUT_WR);
 	if (!vtc_stop && !VTCP_Check(j))
 		vtc_fatal(vl, "Shutdown failed: %s", strerror(errno));
-	VTCP_close(fdp);
+	VTCP_close(fdp, NULL);
 }
 
 static void
@@ -324,7 +324,7 @@ server_dispatch_wrk(void *priv)
 	j = shutdown(fd, SHUT_WR);
 	if (!VTCP_Check(j))
 		vtc_fatal(vl, "Shutdown failed: %s", strerror(errno));
-	VTCP_close(&s->fd);
+	VTCP_close(&s->fd, NULL);
 	vtc_log(vl, 2, "Ending");
 	pthread_cleanup_pop(0);
 	vtc_logclose(vl);
@@ -393,7 +393,7 @@ server_break(struct server *s)
 	vtc_log(s->vl, 2, "Breaking for server");
 	(void)pthread_cancel(s->tp);
 	AZ(pthread_join(s->tp, &res));
-	VTCP_close(&s->sock);
+	VTCP_close(&s->sock, NULL);
 	s->tp = 0;
 	s->run = 0;
 }
@@ -502,7 +502,7 @@ cmd_server(CMD_ARGS)
 				server_wait(s);
 			}
 			if (s->sock >= 0)
-				VTCP_close(&s->sock);
+				VTCP_close(&s->sock, NULL);
 			server_delete(s);
 		}
 		return;
@@ -550,7 +550,7 @@ cmd_server(CMD_ARGS)
 
 		if (!strcmp(*av, "-listen")) {
 			if (s->sock >= 0)
-				VTCP_close(&s->sock);
+				VTCP_close(&s->sock, NULL);
 			bprintf(s->listen, "%s", av[1]);
 			av++;
 			continue;

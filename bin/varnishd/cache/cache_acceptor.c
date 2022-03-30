@@ -50,6 +50,9 @@
 #include "vtcp.h"
 #include "vtim.h"
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 static pthread_t	VCA_thread;
 static vtim_dur vca_pace = 0.0;
 static struct lock pace_mtx;
@@ -65,6 +68,7 @@ struct wrk_accept {
 	socklen_t		acceptaddrlen;
 	int			acceptsock;
 	struct listen_sock	*acceptlsock;
+	SSL *ssl;
 };
 
 struct poolsock {
@@ -434,6 +438,13 @@ vca_make_session(struct worker *wrk, void *arg)
 	wa->acceptsock = -1;
 	sp->listen_sock = wa->acceptlsock;
 
+	if(wa->ssl)
+		VSL(SLT_Error, 0, "SSL IS SET!");
+
+
+	sp->ssl = wa->ssl;
+
+
 	assert((size_t)wa->acceptaddrlen <= vsa_suckaddr_len);
 
 	if (wa->acceptlsock->uds)
@@ -460,6 +471,7 @@ vca_make_session(struct worker *wrk, void *arg)
 	req = Req_New(sp);
 	CHECK_OBJ_NOTNULL(req, REQ_MAGIC);
 	req->htc->rfd = &sp->fd;
+	req->htc->ssl = sp->ssl;
 
 	SES_SetTransport(wrk, sp, req, wa->acceptlsock->transport);
 	WS_Release(wrk->aws, 0);
@@ -562,6 +574,14 @@ vca_accept_task(struct worker *wrk, void *arg)
 		}
 
 		wa.acceptsock = i;
+		
+		if(ls->ssl_ctx != NULL) {
+			wa.ssl = SSL_new(ls->ssl_ctx);
+			SSL_set_fd(wa.ssl, i);
+			SSL_accept(wa.ssl);
+			VSL(SLT_Error, 0, "Doing SSL!");
+			// TODO, handle errors
+		}
 
 		if (!Pool_Task_Arg(wrk, TASK_QUEUE_REQ,
 		    vca_make_session, &wa, sizeof wa)) {
@@ -769,6 +789,10 @@ VCA_Shutdown(void)
 		i = ls->sock;
 		ls->sock = -2;
 		(void)close(i);
+
+		if(ls->ssl_ctx != NULL){
+			SSL_CTX_free(ls->ssl_ctx);
+		}
 	}
 	AZ(pthread_mutex_unlock(&shut_mtx));
 }

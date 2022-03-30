@@ -76,17 +76,54 @@ struct uds_perms {
 static VTAILQ_HEAD(,listen_arg) listen_args =
     VTAILQ_HEAD_INITIALIZER(listen_args);
 
+
+SSL_CTX *create_context()
+{
+    const SSL_METHOD *method;
+    SSL_CTX *ctx;
+
+    method = TLS_server_method();
+
+    ctx = SSL_CTX_new(method);
+    if (!ctx) {
+        perror("Unable to create SSL context");
+        ERR_print_errors_fp(stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    return ctx;
+}
+
+void configure_context(SSL_CTX *ctx)
+{
+    /* Set the key and cert */
+    if (SSL_CTX_use_certificate_file(ctx, "/tmp/cert.pem", SSL_FILETYPE_PEM) <= 0) {
+        ERR_print_errors_fp(stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    if (SSL_CTX_use_PrivateKey_file(ctx, "/tmp/key.pem", SSL_FILETYPE_PEM) <= 0 ) {
+        ERR_print_errors_fp(stderr);
+        exit(EXIT_FAILURE);
+    }
+}
+
 static int
 mac_opensocket(struct listen_sock *ls)
 {
 	int fail;
 	struct sockaddr_un uds;
+	
 
 	CHECK_OBJ_NOTNULL(ls, LISTEN_SOCK_MAGIC);
 	if (ls->sock > 0) {
 		MCH_Fd_Inherit(ls->sock, NULL);
 		closefd(&ls->sock);
 	}
+
+	ls->ssl_ctx = create_context();
+	configure_context(ls->ssl_ctx);
+
 	if (!ls->uds)
 		ls->sock = VTCP_bind(ls->addr, NULL);
 	else {

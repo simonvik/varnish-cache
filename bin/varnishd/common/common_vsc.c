@@ -31,6 +31,10 @@
 
 #include "config.h"
 
+
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>

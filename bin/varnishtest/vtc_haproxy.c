@@ -275,7 +275,7 @@ haproxy_cli_recv(struct haproxy_cli *hc)
 
 			vtc_log(hc->vl, 4, "CLI connection normally closed");
 			vtc_log(hc->vl, 3, "CLI closing fd %d", hc->sock);
-			VTCP_close(&hc->sock);
+			VTCP_close(&hc->sock, NULL);
 			break;
 		}
 
@@ -628,7 +628,7 @@ haproxy_new(const char *name)
 		macro_def(h->vl, h->closed_sock, "sock", "[%s]:%s", addr, port);
 	macro_def(h->vl, h->closed_sock, "addr", "%s", addr);
 	macro_def(h->vl, h->closed_sock, "port", "%s", port);
-	VTCP_close(&closed_sock);
+	VTCP_close(&closed_sock, NULL);
 
 	h->cli = haproxy_cli_new(h);
 	AN(h->cli);

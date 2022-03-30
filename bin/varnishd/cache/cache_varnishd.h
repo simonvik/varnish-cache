@@ -97,6 +97,7 @@ struct http_conn {
 #define HTTP_CONN_MAGIC		0x3e19edd1
 
 	int			*rfd;
+	SSL *ssl;
 	stream_close_t		doclose;
 	body_status_t		body_status;
 	struct ws		*ws;

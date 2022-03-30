@@ -1520,7 +1520,7 @@ cmd_http_close(CMD_ARGS)
 	assert(*hp->sfd >= 0);
 	if (hp->h2)
 		stop_h2(hp);
-	VTCP_close(&hp->sess->fd);
+	VTCP_close(&hp->sess->fd, NULL);
 	vtc_log(vl, 4, "Closed");
 }
 
@@ -1544,7 +1544,7 @@ cmd_http_accept(CMD_ARGS)
 	if (hp->h2)
 		stop_h2(hp);
 	if (hp->sess->fd >= 0)
-		VTCP_close(&hp->sess->fd);
+		VTCP_close(&hp->sess->fd, NULL);
 	vtc_log(vl, 4, "Accepting");
 	hp->sess->fd = accept(*hp->sfd, NULL, NULL);
 	if (hp->sess->fd < 0)

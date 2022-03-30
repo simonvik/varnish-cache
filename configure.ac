@@ -364,6 +364,9 @@ case $target in
 esac
 AC_SUBST(JEMALLOC_LDADD)
 
+PKG_CHECK_MODULES([CRYPTO], [libcrypto >= 1.0.2])
+PKG_CHECK_MODULES([SSL], [openssl])
+
 AC_CHECK_FUNCS([setproctitle])
 
 # if the default libexecinfo on alpine causes issues, you can use libunwind

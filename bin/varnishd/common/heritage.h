@@ -31,6 +31,11 @@
  * This file contains the heritage passed when mgt forks cache
  */
 
+
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
+
 struct vsmw;
 struct suckaddr;
 struct listen_sock;
@@ -53,6 +58,7 @@ struct listen_sock {
 	const struct uds_perms		*perms;
 	unsigned			test_heritage;
 	struct conn_heritage		*conn_heritage;
+	SSL_CTX *ssl_ctx;
 };
 
 VTAILQ_HEAD(listen_sock_head, listen_sock);

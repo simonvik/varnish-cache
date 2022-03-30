@@ -564,7 +564,7 @@ tunnel_delete(struct tunnel *t)
 	assert(t->asock < 0);
 	assert(t->csock < 0);
 	if (t->lsock >= 0)
-		VTCP_close(&t->lsock);
+		VTCP_close(&t->lsock, NULL);
 	macro_undef(t->vl, t->name, "addr");
 	macro_undef(t->vl, t->name, "port");
 	macro_undef(t->vl, t->name, "sock");
@@ -587,7 +587,7 @@ tunnel_listen(struct tunnel *t)
 	const char *err;
 
 	if (t->lsock >= 0)
-		VTCP_close(&t->lsock);
+		VTCP_close(&t->lsock, NULL);
 	t->lsock = VTCP_listen_on(t->listen, "0", 1, &err);
 	if (err != NULL)
 		vtc_fatal(t->vl,
@@ -663,9 +663,9 @@ tunnel_wait(struct tunnel *t)
 		vtc_fatal(t->vl, "Tunnel poll returned \"%p\"", res);
 
 	if (t->csock >= 0)
-		VTCP_close(&t->csock);
+		VTCP_close(&t->csock, NULL);
 	if (t->asock >= 0)
-		VTCP_close(&t->asock);
+		VTCP_close(&t->asock, NULL);
 	t->tspec = 0;
 	t->tpoll = 0;
 	t->state = TUNNEL_STOPPED;

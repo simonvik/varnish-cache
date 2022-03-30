@@ -43,6 +43,9 @@
 #include <stdarg.h>
 #include <sys/types.h>
 
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 #include "vdef.h"
 #include "vrt.h"
 
@@ -552,6 +555,7 @@ struct sess {
 	struct listen_sock	*listen_sock;
 	int			refcnt;
 	int			fd;
+	SSL 		*ssl;
 	uint32_t		vxid;
 
 	struct lock		mtx;

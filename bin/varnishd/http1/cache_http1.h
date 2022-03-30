@@ -54,13 +54,13 @@ struct v1p_acct {
 
 int V1P_Enter(void);
 void V1P_Leave(void);
-void V1P_Process(const struct req *, int fd, struct v1p_acct *);
+void V1P_Process(const struct req *, int fd, SSL *ssl, struct v1p_acct *);
 void V1P_Charge(struct req *, const struct v1p_acct *, struct VSC_vbe *);
 
 /* cache_http1_line.c */
 void V1L_Chunked(const struct worker *w);
 void V1L_EndChunk(const struct worker *w);
-void V1L_Open(struct worker *, struct ws *, int *fd, struct vsl_log *,
+void V1L_Open(struct worker *, struct ws *, int *fd, SSL *ssl, struct vsl_log *,
     vtim_real deadline, unsigned niov);
 stream_close_t V1L_Flush(const struct worker *w);
 stream_close_t V1L_Close(struct worker *w, uint64_t *cnt);

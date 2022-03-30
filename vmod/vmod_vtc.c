@@ -68,7 +68,7 @@ vmod_barrier_sync(VRT_CTX, VCL_STRING addr, VCL_DURATION tmo)
 		return;
 	}
 
-	sz = VTCP_read(sock, buf, sizeof buf, tmo);
+	sz = VTCP_read(sock, NULL,  buf, sizeof buf, tmo);
 	i = errno;
 	closefd(&sock);
 	if (sz < 0)

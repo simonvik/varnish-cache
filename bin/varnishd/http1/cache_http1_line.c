@@ -67,6 +67,7 @@ struct v1l {
 	ssize_t			cnt;	/* Flushed byte count */
 	struct ws		*ws;
 	uintptr_t		ws_snap;
+	SSL *ssl;
 };
 
 /*--------------------------------------------------------------------
@@ -75,7 +76,7 @@ struct v1l {
  */
 
 void
-V1L_Open(struct worker *wrk, struct ws *ws, int *fd, struct vsl_log *vsl,
+V1L_Open(struct worker *wrk, struct ws *ws, int *fd, SSL *ssl, struct vsl_log *vsl,
     vtim_real deadline, unsigned niov)
 {
 	struct v1l *v1l;
@@ -116,6 +117,7 @@ V1L_Open(struct worker *wrk, struct ws *ws, int *fd, struct vsl_log *vsl,
 	v1l->siov = u;
 	v1l->ciov = u;
 	v1l->wfd = fd;
+	v1l->ssl = ssl;
 	v1l->deadline = deadline;
 	v1l->vsl = vsl;
 	v1l->werr = SC_NULL;
@@ -168,6 +170,42 @@ v1l_prune(struct v1l *v1l, size_t bytes)
 	AZ(v1l->liov);
 }
 
+
+ssize_t
+SSL_writev (SSL *ssl, const struct iovec *vector, int count)
+{
+  char *buffer;
+  register char *bp;
+  size_t bytes, to_copy;
+  int i;
+
+  /* Find the total number of bytes to be written.  */
+  bytes = 0;
+  for (i = 0; i < count; ++i)
+    bytes += vector[i].iov_len;
+
+  /* Allocate a temporary buffer to hold the data.  */
+  buffer = (char *) alloca (bytes);
+
+  /* Copy the data into BUFFER.  */
+  to_copy = bytes;
+  bp = buffer;
+  for (i = 0; i < count; ++i)
+    {
+#     define min(a, b)		((a) > (b) ? (b) : (a))
+      size_t copy = min (vector[i].iov_len, to_copy);
+
+      memcpy ((void *) bp, (void *) vector[i].iov_base, copy);
+      bp += copy;
+
+      to_copy -= copy;
+      if (to_copy == 0)
+        break;
+    }
+
+  return SSL_write (ssl, buffer, bytes);
+}
+
 stream_close_t
 V1L_Flush(const struct worker *wrk)
 {
@@ -212,7 +250,12 @@ V1L_Flush(const struct worker *wrk)
 				break;
 			}
 
-			i = writev(*v1l->wfd, v1l->iov, v1l->niov);
+			if(v1l->ssl != NULL){
+				i = SSL_writev(v1l->ssl, v1l->iov, v1l->niov);
+				VSLb(v1l->vsl, SLT_Error, "Im here");
+			}else
+				i = writev(*v1l->wfd, v1l->iov, v1l->niov);
+
 			if (i > 0)
 				v1l->cnt += i;
 

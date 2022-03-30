@@ -233,7 +233,7 @@ vbp_write(struct vbp_target *vt, int *sock, const void *buf, size_t len)
 				"Short write (%d/%zu) error %d (%s)",
 				i, len, errno, VAS_errtxt(errno));
 		}
-		VTCP_close(sock);
+		VTCP_close(sock, NULL);
 		return (-1);
 	}
 	return (0);
@@ -308,7 +308,7 @@ vbp_poke(struct vbp_target *vt)
 		bprintf(vt->resp_buf,
 			"Open timeout %.3fs exceeded by %.3fs",
 			vt->timeout, t_now - t_end);
-		VTCP_close(&s);
+		VTCP_close(&s, NULL);
 		return;
 	}
 
@@ -321,7 +321,7 @@ vbp_poke(struct vbp_target *vt)
 
 	if (proxy_header < 0) {
 		bprintf(vt->resp_buf, "%s", "No backend");
-		VTCP_close(&s);
+		VTCP_close(&s, NULL);
 		return;
 	}
 
@@ -378,7 +378,7 @@ vbp_poke(struct vbp_target *vt)
 		rlen += i;
 	}
 
-	VTCP_close(&s);
+	VTCP_close(&s, NULL);
 
 	if (i < 0) {
 		/* errno reported above */

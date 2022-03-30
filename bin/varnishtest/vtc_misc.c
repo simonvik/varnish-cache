@@ -356,7 +356,7 @@ ipvx_works(const char *target)
 	fd = VTCP_bind(sa, NULL);
 	free(sa);
 	if (fd >= 0) {
-		VTCP_close(&fd);
+		VTCP_close(&fd, NULL);
 		return (1);
 	}
 	return (0);

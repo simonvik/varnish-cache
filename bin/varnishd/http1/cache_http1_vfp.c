@@ -74,7 +74,11 @@ v1f_read(const struct vfp_ctx *vc, struct http_conn *htc, void *d, ssize_t len)
 			htc->pipeline_b = htc->pipeline_e = NULL;
 	}
 	if (len > 0) {
-		i = read(*htc->rfd, p, len);
+		if(htc->ssl != NULL)
+			i = SSL_read(htc->ssl, p, len);
+		else
+			i = read(*htc->rfd, p, len);
+		
 		if (i < 0) {
 			VTCP_Assert(i);
 			VSLb(vc->wrk->vsl, SLT_FetchError,

@@ -30,6 +30,10 @@
  *
  */
 
+
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+
 struct suckaddr;
 
 /* from libvarnish/tcp.c */
@@ -59,11 +63,11 @@ int VTCP_connected(int s);
 int VTCP_connect(const struct suckaddr *name, int msec);
 int VTCP_open(const char *addr, const char *def_port, vtim_dur timeout,
     const char **err);
-void VTCP_close(int *s);
+void VTCP_close(int *s, SSL *ssl);
 int VTCP_bind(const struct suckaddr *addr, const char **errp);
 int VTCP_listen(const struct suckaddr *addr, int depth, const char **errp);
 int VTCP_listen_on(const char *addr, const char *def_port, int depth,
     const char **errp);
 void VTCP_set_read_timeout(int s, vtim_dur seconds);
-int VTCP_read(int fd, void *ptr, size_t len, vtim_dur tmo);
+int VTCP_read(int fd, SSL *ssl,  void *ptr, size_t len, vtim_dur tmo);
 // #endif

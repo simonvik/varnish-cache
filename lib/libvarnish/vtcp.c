@@ -336,9 +336,13 @@ VTCP_connect(const struct suckaddr *name, int msec)
  */
 
 void
-VTCP_close(int *s)
+VTCP_close(int *s, SSL *ssl)
 {
 	int i;
+	if(ssl != NULL) {
+		SSL_shutdown(ssl);
+		SSL_free(ssl);
+	}
 
 	i = close(*s);
 
@@ -634,7 +638,7 @@ VTCP_Check(ssize_t a)
  */
 
 int
-VTCP_read(int fd, void *ptr, size_t len, vtim_dur tmo)
+VTCP_read(int fd, SSL *ssl, void *ptr, size_t len, vtim_dur tmo)
 {
 	struct pollfd pfd[1];
 	int i, j;
@@ -650,7 +654,10 @@ VTCP_read(int fd, void *ptr, size_t len, vtim_dur tmo)
 		if (j == 0)
 			return (-2);
 	}
-	i = read(fd, ptr, len);
+	if(ssl != NULL)
+		i = SSL_read(ssl, ptr, len);
+	else
+		i = read(fd, ptr, len);
 	VTCP_Assert(i);
 	return (i < 0 ? -1 : i);
 }

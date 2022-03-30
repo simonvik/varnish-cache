@@ -384,7 +384,7 @@ HTC_RxStuff(struct http_conn *htc, htc_complete_f *func,
 		}
 		if (tmo <= 0.0)
 			tmo = 1e-3;
-		z = VTCP_read(*htc->rfd, htc->rxbuf_e, z, tmo);
+		z = VTCP_read(*htc->rfd, htc->ssl, htc->rxbuf_e, z, tmo);
 		if (z == 0 || z == -1) {
 			WS_ReleaseP(htc->ws, htc->rxbuf_b);
 			return (HTC_S_EOF);

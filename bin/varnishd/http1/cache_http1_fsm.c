@@ -203,7 +203,11 @@ http1_minimal_response(struct req *req, uint16_t status)
 
 	if (status >= 400)
 		req->err_code = status;
-	wl = write(req->sp->fd, buf, l);
+
+	if(req->sp->ssl != NULL)
+		wl = SSL_write(req->sp->ssl, buf, l);
+	else
+		wl = write(req->sp->fd, buf, l);
 
 	if (wl > 0)
 		req->acct.resp_hdrbytes += wl;
